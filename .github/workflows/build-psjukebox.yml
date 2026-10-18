@@ -47,7 +47,7 @@ jobs:
           ver=re.search(r'constexpr const char\* version="(v[^"]+)";',code)
           assert ver, "PSJukebox version declaration missing"
           assert ver.group(1)=="v"+metadata["version"], "App header and release version differ"
-          assert metadata["releaseTag"]=="psjukebox-"+ver.group(1), "Release tag mismatch"
+          assert metadata["releaseTag"]==ver.group(1), "Release tag mismatch"
           assert 'std::string("by YAHBALLON  ·  ")+version' in code
           assert '182,133,16,color(0xe6f0e9,.89f)' in code, "Credits must be under PSJUKE BOX"
           assert 'label(d,font,atlas,clockText,1853,87,29,white,Align::right)' in code
