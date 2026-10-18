@@ -19,19 +19,9 @@ jobs:
           set -euo pipefail
           git clone --depth=1 --filter=blob:none https://github.com/Yahballon/tmp_lap.git /tmp/psjukebox-upstream
           cp -a /tmp/psjukebox-upstream/homebrew/psjukebox/. ./
-          mkdir -p .github/workflows
-          python3 - <<'PY'
-          from pathlib import Path
-          source=Path("/tmp/psjukebox-upstream/.github/workflows/build-psjukebox.yml").read_text()
-          # Re-root the proven CI so the separate repository is self-contained.
-          source=source.replace("'homebrew/psjukebox/**'", "'native/**'\n      - 'tests/**'\n      - 'tools/**'\n      - 'helper/**'\n      - 'assets/**'\n      - 'app.json'\n      - 'RELEASE_NOTES.md'")
-          source=source.replace('homebrew/psjukebox/', '')
-          Path(".github/workflows/build-psjukebox.yml").write_text(source)
-          assert "homebrew/psjukebox/" not in source
-          assert Path("native/main.cpp").is_file()
-          assert Path("assets/neon-icon.webp").is_file()
-          assert Path("tests/vinyl_motion_test.cpp").is_file()
-          PY
+          test -f native/main.cpp
+          test -f assets/neon-icon.webp
+          test -f tests/vinyl_motion_test.cpp
       - name: Commit complete standalone source
         run: |
           set -euo pipefail
