@@ -2,7 +2,7 @@
 import json,sys,zipfile,struct
 from pathlib import Path
 from PIL import Image, ImageChops
-meta=json.loads(Path("homebrew/psjukebox/app.json").read_text())
+meta=json.loads(Path("app.json").read_text())
 name=meta["titleId"]
 p=Path(sys.argv[1])
 assert p.is_file(),p
@@ -14,7 +14,7 @@ assert param["titleId"]==name
 assert param["contentId"]==meta["contentId"]
 with Image.open(root/"sce_sys/icon0.png") as icon:
  assert icon.size==(512,512)
- with Image.open("homebrew/psjukebox/assets/neon-icon.webp") as source:
+ with Image.open("assets/neon-icon.webp") as source:
   expected=source.convert("RGB").resize((512,512),Image.Resampling.LANCZOS)
   assert ImageChops.difference(icon.convert("RGB"),expected).getbbox() is None, "PS5 menu icon is not the new neon jukebox artwork"
 with Image.open(root/"assets/icon0.png") as app_icon:
@@ -34,5 +34,5 @@ from tempfile import NamedTemporaryFile
 import subprocess
 with NamedTemporaryFile(suffix=".huifont") as temp:
  temp.write((root/"assets/fonts/international.huifont").read_bytes());temp.flush()
- subprocess.run([sys.executable,"homebrew/psjukebox/tools/verify-international-font.py",temp.name],check=True)
+ subprocess.run([sys.executable,"tools/verify-international-font.py",temp.name],check=True)
 print("Verified installable",p)

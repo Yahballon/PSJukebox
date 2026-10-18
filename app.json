@@ -1,11 +1,11 @@
 {
   "name": "PSJukebox",
   "slug": "psjukebox",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "titleId": "PPSA99947",
   "contentId": "UP9000-PPSA99947_00-PSJUKEBOX0000001",
-  "contentVersion": "01.000.023",
-  "releaseTag": "psjukebox-v0.1.23",
+  "contentVersion": "01.000.024",
+  "releaseTag": "v0.1.24",
   "developer": "YAHBALLON",
   "formats": [
     "mp3",
@@ -18,6 +18,6 @@
     "wma",
     "album"
   ],
-  "theme": "Per-artist and per-album local artwork",
+  "theme": "Deterministic randomized Rasta palettes per album",
   "offline": false
 }

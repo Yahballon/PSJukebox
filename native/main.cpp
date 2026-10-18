@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// PSJukebox by YAHBALLON v0.1.23
+// PSJukebox by YAHBALLON v0.1.24
 #include "gfx/renderer.hpp"
 #include "platform/ps5/display_egl.hpp"
 #include "platform/ps5/pad.hpp"
@@ -10,6 +10,7 @@
 #include "stick_nav.hpp"
 #include "cover_motion.hpp"
 #include "vinyl_motion.hpp"
+#include "rasta_album_theme.hpp"
 #include "cover_browse.hpp"
 #include "dashboard_layout.hpp"
 #include "song_navigation.hpp"
@@ -40,7 +41,7 @@
 
 using namespace hui::gfx;
 namespace {
-constexpr const char* version="v0.1.23";
+constexpr const char* version="v0.1.24";
 const Color white=Color::rgb(0xffffff),muted=Color::rgb(0xc5c8cf),black=Color::rgb(0x000000);
 Color color(uint32_t hex,float alpha=1.f){return Color::rgb(hex,alpha);}
 std::string cut(const std::string& s,size_t n){return jukebox::utf8_cut(s,n);}
@@ -297,7 +298,7 @@ void footer(DrawList& d,const Font& font,unsigned atlas,int screen){
 }
 }
 int main(){
- log("BOOT v0.1.23");
+ log("BOOT v0.1.24");
  hui::ps5::Display display;if(!display.open())hui::sys::park();
  Renderer renderer;if(!renderer.init())hui::sys::park();
  Font font;auto f=read("/app0/assets/fonts/inter-semibold.huifont",4*1024*1024);
@@ -902,10 +903,14 @@ int main(){
    }
   }
   artist=currentArtist();album=currentAlbum();
-  // Screenshot-matched gold is consistent across artists, while their
-  // individual background images remain unique.
-  const uint32_t accent=jukebox::dashboard::gold;
-  const uint32_t secondary=artist?artist->theme.secondary:0x173f37;
+  // Stable album-seeded Rasta palette (no frame-by-frame random flickering).
+  const std::string_view albumKey=album?
+      (album->path.empty()?std::string_view(album->name):std::string_view(album->path)):
+      std::string_view{};
+  const auto albumTheme=jukebox::rasta_album_theme(albumKey);
+  const uint32_t accent=album?albumTheme.accent:jukebox::dashboard::gold;
+  const uint32_t secondary=album?albumTheme.backdrop:
+      (artist?artist->theme.secondary:0x173f37);
   auto cached=[&](const std::string& path)->Texture {
    if(path.empty())return {};
    auto it=images.find(path);return it==images.end()?Texture{}:it->second;
@@ -1057,13 +1062,13 @@ int main(){
   d.gradient_rect({rightInfo.x,rightInfo.y,rightInfo.w,rightInfo.h},20,color(0x082823,.92f),color(0x07111b,.89f));
   d.bordered_rect({rightInfo.x,rightInfo.y,rightInfo.w,rightInfo.h},20,
                   color(0x04171a,.2f),1.4f,color(0x9ed2c2,.58f));
-  d.rounded_rect({65,216,8,30},3,color(0x0ac77b));
-  d.rounded_rect({65,246,8,30},0,color(accent));
-  d.rounded_rect({65,276,8,33},3,color(0xe34e39));
+  d.rounded_rect({65,216,8,30},3,color(albumTheme.stripes[0]));
+  d.rounded_rect({65,246,8,30},0,color(albumTheme.stripes[1]));
+  d.rounded_rect({65,276,8,33},3,color(albumTheme.stripes[2]));
   label(d,font,atlas,"NOW BROWSING",99,243,16,color(accent));
   label(d,font,atlas,artist?cut(artist->name,15):"Library",99,281,29,white);
   label(d,font,atlas,"A R T I S T",100,308,13,muted);
-  d.circle(1632,264,29,color(accent,.88f));
+  d.circle(1632,264,29,color(albumTheme.gold,.88f));
   d.ring(1632,264,23,2.f,color(0x91671d,.82f));
   d.circle(1632,264,7,color(0x061818));
   label(d,font,atlas,"ALBUM",1685,245,17,color(accent));
@@ -1132,9 +1137,9 @@ int main(){
    d.shadow({box.x,box.y,box.w,box.h},25,22,color(0x000000,.82f));
    d.gradient_rect({box.x,box.y,box.w,box.h},25,color(0x052b23,.95f),color(0x04101b,.96f));
    d.bordered_rect({box.x,box.y,box.w,box.h},25,color(0x031b19,.13f),1.8f,color(0x8cddc4,.94f));
-   d.rounded_rect({86,784,9,51},3,color(0x0ccf80));
-   d.rounded_rect({86,835,9,54},0,color(accent));
-   d.rounded_rect({86,889,9,51},3,color(0xe75a40));
+   d.rounded_rect({86,784,9,51},3,color(albumTheme.stripes[0]));
+   d.rounded_rect({86,835,9,54},0,color(albumTheme.stripes[1]));
+   d.rounded_rect({86,889,9,51},3,color(albumTheme.stripes[2]));
    const jukebox::Track* playing=active_track();
    const jukebox::Artist* playingArtist=nullptr;
    const jukebox::Album* playingAlbum=nullptr;
@@ -1154,7 +1159,7 @@ int main(){
    for(int i=0;i<11;i++)d.ring(vx,vy,vr-9.f-i*5.1f,.8f,
                                color(i%2?0x728384:0x283536,.34f));
    d.circle(vx,vy,29,color(0x9d721e));
-   d.ring(vx,vy,26,3.f,color(accent,.93f));
+   d.ring(vx,vy,26,3.f,color(albumTheme.gold,.93f));
    d.circle(vx,vy,7,color(0x06191a));
    for(int i=0;i<24;i++){
     const float theta=vinylMotion.angle()+i*.2617994f;
@@ -1167,7 +1172,7 @@ int main(){
     const float angle=vinylMotion.angle()+i*2.0943951f;
     d.line(vx+std::cos(angle)*12.f,vy+std::sin(angle)*12.f,
            vx+std::cos(angle)*23.f,vy+std::sin(angle)*23.f,
-           3.f,color(i==0?0x0ec96c:(i==1?0xffd03f:0xe8533f)));
+           3.f,color(albumTheme.stripes[i]));
    }
    const auto thumb=jukebox::dashboard::playingArtwork;
    d.shadow({thumb.x,thumb.y,thumb.w,thumb.h},13,7,color(0x000000,.63f));
@@ -1208,7 +1213,7 @@ int main(){
     const float motion=audioState.playing&&!audioState.paused?
       std::fabs(std::sin(frame*.056f+i*.43f)*std::cos(frame*.025f+i*.21f)):0.f;
     const float height=3.f+motion*(13.f+30.f*(1.f-std::fabs(i-17.f)/18.f));
-    const uint32_t hue=i<12?0x17c674:(i<24?0xf4ca3c:0xea553d);
+    const uint32_t hue=i<12?albumTheme.green:(i<24?albumTheme.gold:albumTheme.red);
     d.rounded_rect({950.f+i*13.5f,902.f-height,7.f,height},2,
                    color(hue,.29f+motion*.39f));
    }

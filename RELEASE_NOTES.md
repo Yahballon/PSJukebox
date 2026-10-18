@@ -1,10 +1,7 @@
-# PSJukebox v0.1.23 — Neon Glass & Spinning Vinyl
+# PSJukebox v0.1.24 — Standalone Source & Rasta Colorways
 
-- Updated native PS5 music UI inspired by the user-supplied reggae/gold screenshot: emerald glass, reggae stripes, disc-shaped album counter and refined player/footer.
-- Move **by YAHBALLON · v0.1.23** under the PSJUKE BOX wordmark; status panel keeps live READY, artist count, tracks and clock.
-- In NOW PLAYING, the sleeve sits over a vinyl that rotates at 33 1/3 RPM while the decoder plays, freezes on pause and resumes without jumping.
-- Add real playback codec, channels and sample rate badges (read from FFmpeg; never hardcode FLAC/44.1kHz).
-- Decorative animated reggae-tinted spectrum bars, bigger song typography and extended seek bar.
-- Preserve fast no-flicker album browsing, SMB network shares, favorites and DualSense functions.
-
-Github Actions builds and verifies the package; PS5 hardware must still validate smooth rendering.
+- **New home:** [Yahballon/PSJukebox](https://github.com/Yahballon/PSJukebox), including native source, icon assets, SMB integration, regression tests and build pipeline.
+- **Randomized per-album colorways:** green, gold, and red variants are derived from a stable album identifier; accents, shades and Rasta stripe order vary between albums but never flicker.
+- The now-playing panel, vinyl details, disc icon and decorative spectrum follow each album's theme.
+- Preserve the 33⅓ RPM rotating record, emerald-glass UI, true FFmpeg metadata, USB/SMB shares, background scans, favorites and cached coverflow.
+- Release artifact: `PPSA99947.zip`. PS5 runtime appearance should still be validated on hardware.

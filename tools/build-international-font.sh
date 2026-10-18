@@ -47,4 +47,4 @@ test -s "$font"
 "$root/bake-font" "$font" "$app/assets/fonts/international.huifont" 52 7 4096 european \
   > "$root/font-bake.log" 2>&1 || { tail -70 "$root/font-bake.log"; exit 1; }
 tail -1 "$root/font-bake.log"
-python3 homebrew/psjukebox/tools/verify-international-font.py "$app/assets/fonts/international.huifont"
+python3 tools/verify-international-font.py "$app/assets/fonts/international.huifont"
