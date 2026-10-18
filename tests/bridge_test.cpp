@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+#include "../native/remote_bridge.hpp"
+#include <atomic>
+#include <cassert>
+#include <cstdio>
+#include <sys/stat.h>
+int main() {
+ auto found=jbx::scan();
+ assert(found.helperRunning);
+ assert(found.library.artists.size()==3);
+ auto& artist=found.library.artists[0];
+ assert(artist.name=="Bob Marley");
+ assert(artist.theme.accent==0x44cc77);
+ assert(artist.albums.size()==2);
+ assert(found.library.trackCount==3);
+ assert(found.archives.size()==2);
+ bool rootAlbum=false;
+ for(const auto& a:found.archives)if(a.artist.empty()&&a.path.find("RootAlbum.album")!=std::string::npos)rootAlbum=true;
+ assert(rootAlbum);
+ assert(found.archives[0].artist=="Tupac");
+ assert(found.archives[0].path.find("Killuminati.album")!=std::string::npos);
+ const jukebox::Album* album=nullptr;
+ for(const auto& a:artist.albums)if(a.name=="Legend")album=&a;
+ assert(album&&album->tracks.size()==1);
+ assert(!album->cover.empty()&&!album->background.empty());
+ std::string bytes,error;
+ assert(jbx::image_bytes(artist.logo,bytes,error)&&bytes.size()==264);
+ std::atomic<bool> cancelled{false};
+ std::string local;
+ assert(jbx::stage_track(album->tracks[0].path,album->tracks[0].size,cancelled,local,error));
+ struct stat st{};
+ assert(stat(local.c_str(),&st)==0);
+ assert((uint64_t)st.st_size==album->tracks[0].size);
+ auto tupac=found.library.artists[1];
+ assert(tupac.name=="Tupac");
+ assert(tupac.albums.size()==1);
+ assert(tupac.albums[0].tracks.empty());
+ assert(tupac.albums[0].name=="All Eyez on Me");
+ assert(found.library.artists[2].name=="wu-tang");
+ assert(found.library.artists[2].albums[0].name=="Singles");
+ assert(found.library.artists[2].albums[0].tracks.size()==1);
+ std::puts("PASS PSJukebox USB music helper integration");
+}
